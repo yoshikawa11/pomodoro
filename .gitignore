@@ -1,0 +1,4 @@
+# Project exclude paths
+/Pomodoro/.gradle/
+/Pomodoro/build/
+/Pomodoro/build/classes/java/main/
