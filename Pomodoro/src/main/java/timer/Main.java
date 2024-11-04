@@ -2,12 +2,12 @@ package timer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 
 public class Main {
     private static int counter = 60; // 60秒のカウントダウン
     static Timer timer;
+    private static boolean running = false;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("ポモドーロタイマー");
@@ -28,50 +28,43 @@ public class Main {
         gbc.gridwidth = 2;
         frame.add(timerLabel, gbc);
 
-        JButton startButton = new JButton("スタート");
-        startButton.setPreferredSize(new Dimension(100, 45)); // ボタンのサイズを設定
+        // スタート/リセットボタン
+        JButton startResetButton = new JButton("スタート");
+        startResetButton.setPreferredSize(new Dimension(100, 40)); // ボタンのサイズを設定
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        frame.add(startButton, gbc);
+        gbc.gridwidth = 2; // ボタンが横に広がるように設定
+        frame.add(startResetButton, gbc);
 
-//        JButton resetButton = new JButton("リセット");
-//        resetButton.setPreferredSize(new Dimension(100, 45)); // ボタンのサイズを設定
-//        gbc.gridx = 0;
-//        gbc.gridy = 2;
-//        gbc.gridwidth = 1;
-//        frame.add(resetButton, gbc);
-//
-        timer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                counter--;
+        // タイマーの設定
+        timer = new Timer(1000, e -> {
+            counter--;
+            timerLabel.setText("残り時間: " + counter); // カウントダウンの表示更新
+
+            if (counter <= 0) {
+                ((Timer) e.getSource()).stop();
+                timerLabel.setText("時間切れ！");
+                startResetButton.setText("スタート"); // 時間切れ後は「スタート」に戻す
+                running = false; // タイマーが停止している状態に設定
+            }
+        });
+
+        // スタート/リセットボタンの動作
+        startResetButton.addActionListener(e -> {
+            if (!running) {
+                // スタートボタンの処理
+                timer.start();
+                startResetButton.setText("リセット");
+                running = true;
+            } else {
+                // リセットボタンの処理
+                timer.stop();
+                counter = 60;
                 timerLabel.setText("残り時間: " + counter);
-
-                if (counter <= 0) {
-                    ((Timer) e.getSource()).stop();
-                    timerLabel.setText("時間切れ！");
-                }
+                startResetButton.setText("スタート");
+                running = false;
             }
         });
-
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                timer.start();  // ボタンを押すとタイマーがスタート
-                startButton.setEnabled(false);  // ボタンを無効にして再度押せないようにする
-            }
-        });
-//
-//        resetButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                timer.stop();  // タイマーを停止
-//                counter = 60;  // カウンターを初期値にリセット
-//                timerLabel.setText("残り時間: " + counter);  // ラベルの表示をリセット
-//                startButton.setEnabled(true);  // スタートボタンを再び有効化
-//            }
-//        });
 
         frame.setVisible(true);
     }
