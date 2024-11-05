@@ -5,7 +5,10 @@ import java.awt.*;
 
 
 public class Main {
-    private static int counter = 60; // 60秒のカウントダウン
+    private static final int WORK_TIME = 60;
+    private static final int BREAK_TIME = 30;
+    private static int counter = WORK_TIME;
+    private static boolean isWorkTime = true;// 60秒のカウントダウン
     static Timer timer;
     private static boolean running = false;
 
@@ -39,13 +42,22 @@ public class Main {
         // タイマーの設定
         timer = new Timer(1000, e -> {
             counter--;
-            timerLabel.setText("残り時間: " + counter); // カウントダウンの表示更新
+            timerLabel.setText((isWorkTime ? "作業時間: " : "休憩時間: ") + counter); // カウントダウンの表示更新
 
             if (counter <= 0) {
-                ((Timer) e.getSource()).stop();
-                timerLabel.setText("時間切れ！");
-                startResetButton.setText("スタート"); // 時間切れ後は「スタート」に戻す
-                running = false; // タイマーが停止している状態に設定
+                timer.stop();
+                if (isWorkTime) {
+                    // 作業時間終了 -> 休憩時間開始
+                    isWorkTime = false;
+                    counter = BREAK_TIME;
+                    timerLabel.setText("休憩時間: " + counter);
+                } else {
+                    // 休憩時間終了 -> 作業時間に戻る
+                    isWorkTime = true;
+                    counter = WORK_TIME;
+                    timerLabel.setText("作業時間: " + counter);
+                }
+                timer.start(); // 次のタイマーを自動的に開始
             }
         });
 
@@ -53,16 +65,17 @@ public class Main {
         startResetButton.addActionListener(e -> {
             if (!running) {
                 // スタートボタンの処理
-                timer.start();
-                startResetButton.setText("リセット");
-                running = true;
+                timer.start();  // タイマーを開始
+                startResetButton.setText("リセット");  // ボタンのラベルを「リセット」に変更
+                running = true; // タイマーが動作している状態に設定
             } else {
                 // リセットボタンの処理
-                timer.stop();
-                counter = 60;
-                timerLabel.setText("残り時間: " + counter);
-                startResetButton.setText("スタート");
-                running = false;
+                timer.stop();  // タイマーを停止
+                counter = WORK_TIME;  // カウンターを作業時間の初期値にリセット
+                isWorkTime = true; // 作業時間に戻す
+                timerLabel.setText("作業時間: " + counter);  // ラベルに初期作業時間を再表示
+                startResetButton.setText("スタート");  // ボタンのラベルを「スタート」に変更
+                running = false; // タイマーが停止している状態に設定
             }
         });
 
